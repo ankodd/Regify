@@ -3,7 +3,7 @@ mod requests;
 use requests::*;
 use crate::authentication::Pool;
 use crate::authentication::models::outcome::*;
-use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use uuid::Uuid;
 
 #[post("/login")]
@@ -52,5 +52,13 @@ pub async fn change_user(
         ChangedOutcome::NotFoundField => HttpResponse::BadRequest().json("Not found field"),
         ChangedOutcome::WeakPassword => HttpResponse::BadRequest().json("Weak paswword"),
         ChangedOutcome::InvalidPrivilege => HttpResponse::BadRequest().json("Invalid privilege")
+    }
+}
+
+#[delete("/users/{id}")]
+pub async fn delete_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
+    match pool.delete(uuid.to_owned()).await {
+        DeletedOutcome::Ok(user) => HttpResponse::Ok().json(user),
+        DeletedOutcome::NotFound => HttpResponse::NotFound().json("Not found")
     }
 }

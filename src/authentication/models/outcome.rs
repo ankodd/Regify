@@ -1,4 +1,3 @@
-use uuid::Uuid;
 use crate::authentication::models::User;
 
 pub enum ChangedOutcome {
@@ -16,7 +15,12 @@ pub enum RegistartionOutcome {
 }
 
 pub enum AuthorizatiohOutcome {
-    Ok(Uuid),
+    Ok(User),
     NotFound,
     Other,
+}
+
+pub enum DeletedOutcome {
+    Ok(User),
+    NotFound
 }

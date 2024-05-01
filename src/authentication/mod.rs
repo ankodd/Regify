@@ -51,7 +51,7 @@ impl Pool {
             .get_result::<User>(&mut self.0.get().unwrap()) {
             Ok(user) => {
                 if user.password == passwd {
-                    AuthorizatiohOutcome::Ok(user.id)
+                    AuthorizatiohOutcome::Ok(user)
                 } else {
                     AuthorizatiohOutcome::NotFound
                 }
@@ -105,6 +105,15 @@ impl Pool {
                 }
             },
             _ => ChangedOutcome::NotFoundField
+        }
+    }
+    
+    pub async fn delete(&self, uuid: Uuid) -> DeletedOutcome {
+        match diesel::delete(users)
+            .filter(id.eq(uuid))
+            .get_result::<User>(&mut self.0.get().unwrap()) {
+                Ok(user) => DeletedOutcome::Ok(user),
+                Err(_) => DeletedOutcome::NotFound,
         }
     }
 }

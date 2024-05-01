@@ -16,7 +16,7 @@ async fn main() -> std::io::Result<()> {
             .configure(init_routes)
             .wrap(actix_web::middleware::Logger::default())
     })
-    .bind(("localhost", 8080))?
+    .bind(("localhost", 8000))?
     .run()
     .await
 }
@@ -25,6 +25,10 @@ fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
             .service(routes::login)
-            .service(routes::registration),
+            .service(routes::registration)
+            .service(routes::fetch_users)
+            .service(routes::fetch_user)
+            .service(routes::change_user)
+            .service(routes::delete_user)
     );
 }
