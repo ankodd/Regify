@@ -1,3 +1,6 @@
+use uuid::Uuid;
+use crate::authentication::models::User;
+
 pub enum ChangedOutcome {
     Ok(User),
     NotFoundField,

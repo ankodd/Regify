@@ -1,26 +1,5 @@
-use std::str::FromStr;
-
-use diesel::prelude::*;
 use serde::Serialize;
-use uuid::Uuid;
-use chrono::{DateTime, Utc};
-
-#[derive(Queryable, Serialize)]
-pub struct User {
-    pub id: Uuid,
-    pub username: String,
-    pub password: String,
-    pub privilege: UserPrivilege,
-    pub created_at: DateTime<Utc>
-}
-
-#[derive(Insertable)]
-#[diesel(table_name = crate::schema::users)]
-pub struct NewUser {
-    pub username: String,
-    pub password: String,
-    pub privilege: UserPrivilege,
-}
+use std::str::FromStr;
 
 #[derive(diesel_derive_enum::DbEnum, Debug, Serialize)]
 #[ExistingTypePath = "crate::schema::sql_types::UserPrivilege"]

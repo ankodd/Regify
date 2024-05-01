@@ -1,13 +1,13 @@
 use actix_web::{web, App, HttpServer};
 use env_logger::Env;
 
-mod database;
+mod authentication;
 mod routes;
 mod schema;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let pool = database::Pool::init().await;
+    let pool = authentication::Pool::init().await;
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     HttpServer::new(move || {

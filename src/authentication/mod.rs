@@ -1,7 +1,5 @@
-mod models;
-pub mod outcome;
-use outcome::*;
-use models::*;
+pub mod models;
+use crate::authentication::models::{User, NewUser, outcome::*, privilege::*};
 use crate::schema::users::dsl::*;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
@@ -70,6 +68,13 @@ impl Pool {
         }
     }
 
+    pub async fn get(&self, uuid: Uuid) -> Option<User> {
+        match users.find(uuid).get_result::<User>(&mut self.0.get().unwrap()) {
+            Ok(loaded) => Some(loaded),
+            Err(_) => None
+        }
+    }
+
     pub async fn change_field(&self, uuid: Uuid, field: &str, new: &str) -> ChangedOutcome {
         match field {  
             "username" => {
@@ -96,7 +101,7 @@ impl Pool {
                             .get_result::<User>(&mut self.0.get().unwrap()).unwrap();
                         ChangedOutcome::Ok(user)
                     },
-                    Err(_) => ChangedOutcome::NotFoundField
+                    Err(_) => ChangedOutcome::InvalidPrivilege
                 }
             },
             _ => ChangedOutcome::NotFoundField
