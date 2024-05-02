@@ -1,26 +1,25 @@
 use crate::authentication::models::User;
 
-pub enum ChangedOutcome {
+pub enum ChangedResult {
     Ok(User),
     NotFoundField,
     WeakPassword,
     InvalidPrivilege,
 }
 
-pub enum RegistartionOutcome {
+pub enum RegistrationResult {
     Ok(User),
-    AlreadyInUse,
     WeakPassword,
     Other,
 }
 
-pub enum AuthorizatiohOutcome {
+pub enum AuthorizationResult {
     Ok(User),
     NotFound,
     Other,
 }
 
-pub enum DeletedOutcome {
+pub enum DeletedResult {
     Ok(User),
     NotFound
 }

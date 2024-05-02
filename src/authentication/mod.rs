@@ -1,9 +1,9 @@
 pub mod models;
-use crate::authentication::models::{User, NewUser, outcome::*, privilege::*};
+use crate::authentication::models::{User, NewUser, outcome::*, privilege::*, constants};
 use crate::schema::users::dsl::*;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
-use diesel::result::{DatabaseErrorKind, Error};
+use diesel::result::Error;
 use dotenvy::dotenv;
 use uuid::Uuid;
 use std::env;
@@ -26,12 +26,12 @@ impl Pool {
         Self(pool)
     }
 
-    pub async fn registration(&self, login: &str, passwd: &str) -> RegistartionOutcome {
+    pub async fn registration(&self, login: &str, passwd: &str) -> RegistrationResult {
         if passwd.len() < 8 {
-            return RegistartionOutcome::WeakPassword;
+            return RegistrationResult::WeakPassword;
         }
         let new_user = NewUser {
-            username: login.to_string(),
+            username: login.to_string().to_lowercase(),
             password: passwd.to_string(),
             privilege: UserPrivilege::Free
         };
@@ -39,25 +39,24 @@ impl Pool {
         match diesel::insert_into(users)
             .values(new_user)
             .get_result::<User>(&mut self.0.get().unwrap()) {
-            Ok(user) => RegistartionOutcome::Ok(user),
-            Err(Error::DatabaseError(DatabaseErrorKind::UniqueViolation, _)) => RegistartionOutcome::AlreadyInUse,
-            _ => RegistartionOutcome::Other,
+            Ok(user) => RegistrationResult::Ok(user),
+            Err(_) => RegistrationResult::Other,
         }
     }
 
-    pub async fn login(&self, login: &str, passwd: &str) -> AuthorizatiohOutcome {
+    pub async fn login(&self, login: &str, passwd: &str) -> AuthorizationResult {
         match users
             .filter(username.eq(login.to_lowercase()))
             .get_result::<User>(&mut self.0.get().unwrap()) {
             Ok(user) => {
                 if user.password == passwd {
-                    AuthorizatiohOutcome::Ok(user)
+                    AuthorizationResult::Ok(user)
                 } else {
-                    AuthorizatiohOutcome::NotFound
+                    AuthorizationResult::NotFound
                 }
             }
-            Err(Error::NotFound) => AuthorizatiohOutcome::NotFound,
-            _ => AuthorizatiohOutcome::Other,
+            Err(Error::NotFound) => AuthorizationResult::NotFound,
+            _ => AuthorizationResult::Other,
         }
     }
 
@@ -75,45 +74,45 @@ impl Pool {
         }
     }
 
-    pub async fn change_field(&self, uuid: Uuid, field: &str, new: &str) -> ChangedOutcome {
+    pub async fn change_field(&self, uuid: Uuid, field: &str, new: &str) -> ChangedResult {
         match field {  
-            "username" => {
+            constants::USERNAME => {
                 let user = diesel::update(users.find(uuid))
                     .set(username.eq(new))
                     .get_result::<User>(&mut self.0.get().unwrap()).unwrap();
-                ChangedOutcome::Ok(user)
+                ChangedResult::Ok(user)
             },
-            "password" => {
-                if new.len() < 8 { 
-                    return ChangedOutcome::WeakPassword;
+            constants::PASSWORD => {
+                if new.len() < 8 {
+                    return ChangedResult::WeakPassword;
                 } else {
                     let user = diesel::update(users.find(uuid))
                         .set(password.eq(new))
                         .get_result::<User>(&mut self.0.get().unwrap()).unwrap();
-                    ChangedOutcome::Ok(user)
+                    ChangedResult::Ok(user)
                 }
             },
-            "privilege" => {
+            constants::PRIVILEGE => {
                 match UserPrivilege::from_str(new) {
                     Ok(new_privilege) => {
                         let user = diesel::update(users.find(uuid))
                             .set(privilege.eq(new_privilege))
                             .get_result::<User>(&mut self.0.get().unwrap()).unwrap();
-                        ChangedOutcome::Ok(user)
+                        ChangedResult::Ok(user)
                     },
-                    Err(_) => ChangedOutcome::InvalidPrivilege
+                    Err(_) => ChangedResult::InvalidPrivilege
                 }
             },
-            _ => ChangedOutcome::NotFoundField
+            _ => ChangedResult::NotFoundField
         }
     }
     
-    pub async fn delete(&self, uuid: Uuid) -> DeletedOutcome {
+    pub async fn delete(&self, uuid: Uuid) -> DeletedResult {
         match diesel::delete(users)
             .filter(id.eq(uuid))
             .get_result::<User>(&mut self.0.get().unwrap()) {
-                Ok(user) => DeletedOutcome::Ok(user),
-                Err(_) => DeletedOutcome::NotFound,
+                Ok(user) => DeletedResult::Ok(user),
+                Err(_) => DeletedResult::NotFound,
         }
     }
 }

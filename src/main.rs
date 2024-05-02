@@ -16,7 +16,7 @@ async fn main() -> std::io::Result<()> {
             .configure(init_routes)
             .wrap(actix_web::middleware::Logger::default())
     })
-    .bind(("localhost", 8000))?
+    .bind(("localhost", 8080))?
     .run()
     .await
 }

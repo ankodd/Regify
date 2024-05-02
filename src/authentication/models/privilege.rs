@@ -12,9 +12,9 @@ pub enum UserPrivilege {
 impl ToString for UserPrivilege {
     fn to_string(&self) -> String {
         match self {
-            UserPrivilege::Free => String::from("free"),
-            UserPrivilege::Super => String::from("super"),
-            UserPrivilege::Vip => String::from("vip")
+            UserPrivilege::Free => String::from("Free"),
+            UserPrivilege::Super => String::from("Super"),
+            UserPrivilege::Vip => String::from("Vip")
         }
     }
 }
@@ -23,9 +23,9 @@ impl FromStr for UserPrivilege {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "free" => Ok(UserPrivilege::Free),
-            "super" => Ok(UserPrivilege::Super),
-            "vip" => Ok(UserPrivilege::Vip),
+            "Free" => Ok(UserPrivilege::Free),
+            "Super" => Ok(UserPrivilege::Super),
+            "Vip" => Ok(UserPrivilege::Vip),
             _ => Err("Invalid privilege")
         }
     }

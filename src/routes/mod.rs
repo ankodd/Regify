@@ -9,19 +9,18 @@ use uuid::Uuid;
 #[post("/login")]
 pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl Responder {
     match pool.login(&req.username, &req.password).await {
-        AuthorizatiohOutcome::Ok(id) => HttpResponse::Ok().json(id),
-        AuthorizatiohOutcome::NotFound => HttpResponse::NotFound().json("Not found"),
-        AuthorizatiohOutcome::Other => HttpResponse::InternalServerError().json("Server error"),
+        AuthorizationResult::Ok(user) => HttpResponse::Ok().json(user),
+        AuthorizationResult::NotFound => HttpResponse::NotFound().json("Not found"),
+        AuthorizationResult::Other => HttpResponse::InternalServerError().json("Server error"),
     }
 }
 
 #[post("/registration")]
 pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationRequest>) -> impl Responder {
     match pool.registration(&req.username, &req.password).await {
-        RegistartionOutcome::Ok(user) => HttpResponse::Ok().json(user),
-        RegistartionOutcome::WeakPassword => HttpResponse::BadRequest().json("Weak password"),
-        RegistartionOutcome::AlreadyInUse => HttpResponse::BadRequest().json("Username already in use"),
-        RegistartionOutcome::Other => HttpResponse::BadGateway().json("Bad gateway"),
+        RegistrationResult::Ok(user) => HttpResponse::Ok().json(user),
+        RegistrationResult::WeakPassword => HttpResponse::BadRequest().json("Weak password"),
+        RegistrationResult::Other => HttpResponse::BadGateway().json("Bad gateway"),
     }
 }
 
@@ -48,17 +47,17 @@ pub async fn change_user(
     req: web::Json<ChangeRequest>
     ) -> impl Responder {
     match pool.change_field(uuid.to_owned(), &req.field, &req.new_value).await {
-        ChangedOutcome::Ok(user) => HttpResponse::Ok().json(user),
-        ChangedOutcome::NotFoundField => HttpResponse::BadRequest().json("Not found field"),
-        ChangedOutcome::WeakPassword => HttpResponse::BadRequest().json("Weak paswword"),
-        ChangedOutcome::InvalidPrivilege => HttpResponse::BadRequest().json("Invalid privilege")
+        ChangedResult::Ok(user) => HttpResponse::Ok().json(user),
+        ChangedResult::NotFoundField => HttpResponse::BadRequest().json("Not found field"),
+        ChangedResult::WeakPassword => HttpResponse::BadRequest().json("Weak password"),
+        ChangedResult::InvalidPrivilege => HttpResponse::BadRequest().json("Invalid privilege")
     }
 }
 
 #[delete("/users/{id}")]
 pub async fn delete_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
     match pool.delete(uuid.to_owned()).await {
-        DeletedOutcome::Ok(user) => HttpResponse::Ok().json(user),
-        DeletedOutcome::NotFound => HttpResponse::NotFound().json("Not found")
+        DeletedResult::Ok(user) => HttpResponse::Ok().json(user),
+        DeletedResult::NotFound => HttpResponse::NotFound().json("Not found")
     }
 }

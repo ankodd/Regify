@@ -1,5 +1,6 @@
 pub mod outcome;
 pub mod privilege;
+pub mod constants;
 
 use diesel::prelude::*;
 use serde::Serialize;
