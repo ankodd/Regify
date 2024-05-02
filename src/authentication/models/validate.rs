@@ -17,22 +17,22 @@ pub async fn is_validate_username(pool: &DbPool, login: &str) -> bool {
     }
 }
 
-pub async fn is_validate_password(password: &str) -> PasswordResult {
-    if password.len() < 8 {
-        PasswordResult::TooShort
+pub async fn is_validate_password(passwd: &str) -> PasswordResult {
+    if passwd.len() < 8 {
+        return PasswordResult::TooShort;
     }
 
-    if !password.chars().any(|c| c.is_ascii_uppercase()) {
-        PasswordResult::NoUppercaseLetters
+    if !passwd.chars().any(|c| c.is_ascii_uppercase()) {
+        return PasswordResult::NoUppercaseLetters;
     }
 
-    if !password.chars().any(|c| c.is_ascii_lowercase()) {
-        PasswordResult::NoUppercaseLetters
+    if !passwd.chars().any(|c| c.is_ascii_lowercase()) {
+        return PasswordResult::NoUppercaseLetters;
     }
 
-    if !password.chars().any(|c| c.is_ascii_digit()) {
-        PasswordResult::NoDigits
+    if !passwd.chars().any(|c| c.is_ascii_digit()) {
+        return PasswordResult::NoDigits;
     }
 
-    PasswordResult::Ok(password)
+    PasswordResult::Ok(String::from(passwd))
 }

@@ -27,8 +27,8 @@ pub enum DeleteResult {
     NotFound
 }
 
-pub enum PasswordResult<'a> {
-    Ok(&'a str),
+pub enum PasswordResult {
+    Ok(String),
     TooShort,
     NoDigits,
     NoLowercaseLetters,
@@ -38,7 +38,7 @@ pub enum PasswordResult<'a> {
 impl ToString for PasswordResult {
     fn to_string(&self) -> String {
         match self {
-            PasswordResult::Ok(some) => some.to_string(),
+            PasswordResult::Ok(password) => password.to_string(),
             PasswordResult::NoDigits => String::from("password has no digits"),
             PasswordResult::NoLowercaseLetters => String::from("password has no lowercase letters"),
             PasswordResult::NoUppercaseLetters => String::from("password has no uppercase letters"),

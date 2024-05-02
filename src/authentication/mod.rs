@@ -7,7 +7,6 @@ use diesel::result::Error;
 use dotenvy::dotenv;
 use uuid::Uuid;
 use std::env;
-use std::future::Future;
 use std::str::FromStr;
 use crate::authentication::models::errors::ChangeResult::WeakPassword;
 
@@ -33,10 +32,10 @@ impl Pool {
             return RegistrationResult::AlreadyInUse;
         }
         match is_validate_password(passwd).await {
-            PasswordResult::Ok(password) => {
+            PasswordResult::Ok(passwd) => {
                 let new_user = NewUser {
                     username: login.to_string().to_lowercase(),
-                    password,
+                    password: passwd,
                     privilege: UserPrivilege::Free
                 };
 
@@ -87,7 +86,7 @@ impl Pool {
     pub async fn change_field(&self, uuid: Uuid, field: &str, new: &str) -> ChangeResult {
         match field {  
             constants::USERNAME => {
-                if !self.is_good_username(new).await {
+                if is_validate_username(&self.0, new).await {
                     return ChangeResult::AlreadyInUse;
                 }
 
