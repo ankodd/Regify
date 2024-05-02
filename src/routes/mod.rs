@@ -2,7 +2,7 @@ mod requests;
 
 use requests::*;
 use crate::authentication::Pool;
-use crate::authentication::models::outcome::*;
+use crate::authentication::models::errors::*;
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use uuid::Uuid;
 
@@ -19,7 +19,8 @@ pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl 
 pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationRequest>) -> impl Responder {
     match pool.registration(&req.username, &req.password).await {
         RegistrationResult::Ok(user) => HttpResponse::Ok().json(user),
-        RegistrationResult::WeakPassword => HttpResponse::BadRequest().json("Weak password"),
+        RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(cause),
+        RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json("Username already in user"),
         RegistrationResult::Other => HttpResponse::BadGateway().json("Bad gateway"),
     }
 }
@@ -47,17 +48,18 @@ pub async fn change_user(
     req: web::Json<ChangeRequest>
     ) -> impl Responder {
     match pool.change_field(uuid.to_owned(), &req.field, &req.new_value).await {
-        ChangedResult::Ok(user) => HttpResponse::Ok().json(user),
-        ChangedResult::NotFoundField => HttpResponse::BadRequest().json("Not found field"),
-        ChangedResult::WeakPassword => HttpResponse::BadRequest().json("Weak password"),
-        ChangedResult::InvalidPrivilege => HttpResponse::BadRequest().json("Invalid privilege")
+        ChangeResult::Ok(user) => HttpResponse::Ok().json(user),
+        ChangeResult::NotFoundField => HttpResponse::BadRequest().json("Not found field"),
+        ChangeResult::WeakPassword(cause) => HttpResponse::BadRequest().json(cause),
+        ChangeResult::InvalidPrivilege => HttpResponse::BadRequest().json("Invalid privilege"),
+        ChangeResult::AlreadyInUse => HttpResponse::BadRequest().json(("Username already in use"))
     }
 }
 
 #[delete("/users/{id}")]
 pub async fn delete_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
     match pool.delete(uuid.to_owned()).await {
-        DeletedResult::Ok(user) => HttpResponse::Ok().json(user),
-        DeletedResult::NotFound => HttpResponse::NotFound().json("Not found")
+        DeleteResult::Ok(user) => HttpResponse::Ok().json(user),
+        DeleteResult::NotFound => HttpResponse::NotFound().json("Not found")
     }
 }

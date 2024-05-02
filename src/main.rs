@@ -1,5 +1,6 @@
 use actix_web::{web, App, HttpServer};
 use env_logger::Env;
+use actix_cors::Cors;
 
 mod authentication;
 mod routes;
@@ -11,10 +12,16 @@ async fn main() -> std::io::Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header();
+
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .configure(init_routes)
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(cors)
     })
     .bind(("localhost", 8080))?
     .run()

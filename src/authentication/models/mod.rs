@@ -1,6 +1,7 @@
-pub mod outcome;
+pub mod errors;
 pub mod privilege;
 pub mod constants;
+pub mod validate;
 
 use diesel::prelude::*;
 use serde::Serialize;
