@@ -11,7 +11,7 @@ pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl 
     match pool.login(&req.username, &req.password).await {
         AuthorizationResult::Ok(user) => HttpResponse::Ok().json(user),
         AuthorizationResult::NotFound => HttpResponse::NotFound().json("Not found"),
-        AuthorizationResult::Other => HttpResponse::InternalServerError().json("Server error"),
+        AuthorizationResult::Other => HttpResponse::InternalServerError().json("Server error")
     }
 }
 
@@ -21,7 +21,7 @@ pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationReque
         RegistrationResult::Ok(user) => HttpResponse::Ok().json(user),
         RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(cause),
         RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json("Username already in use"),
-        RegistrationResult::Other => HttpResponse::BadGateway().json("Bad gateway"),
+        RegistrationResult::Other => HttpResponse::InternalServerError().json("Server error")
     }
 }
 
