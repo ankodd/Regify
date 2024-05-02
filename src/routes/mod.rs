@@ -20,7 +20,7 @@ pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationReque
     match pool.registration(&req.username, &req.password).await {
         RegistrationResult::Ok(user) => HttpResponse::Ok().json(user),
         RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(cause),
-        RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json("Username already in user"),
+        RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json("Username already in use"),
         RegistrationResult::Other => HttpResponse::BadGateway().json("Bad gateway"),
     }
 }
