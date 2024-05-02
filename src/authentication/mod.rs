@@ -28,7 +28,7 @@ impl Pool {
     }
 
     pub async fn registration(&self, login: &str, passwd: &str) -> RegistrationResult {
-        if !is_validate_username(&self.0,login).await {
+        if is_validate_username(&self.0, login).await {
             return RegistrationResult::AlreadyInUse;
         }
         match is_validate_password(passwd).await {
@@ -49,7 +49,7 @@ impl Pool {
             PasswordResult::TooShort => RegistrationResult::WeakPassword(PasswordResult::TooShort.to_string()),
             PasswordResult::NoUppercaseLetters => RegistrationResult::WeakPassword(PasswordResult::NoUppercaseLetters.to_string()),
             PasswordResult::NoLowercaseLetters => RegistrationResult::WeakPassword(PasswordResult::NoLowercaseLetters.to_string()),
-            PasswordResult::NoDigits => RegistrationResult::WeakPassword(PasswordResult::NoDigits.to_string()),
+            PasswordResult::NoDigits => RegistrationResult::WeakPassword(PasswordResult::NoDigits.to_string())
         }
     }
 
