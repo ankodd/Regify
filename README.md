@@ -130,7 +130,7 @@ diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
     "created_at": "2024-05-01T18:15:44.527294Z"
 }
 ```
-### 
+### Изменить данные у пользователя
 Метод: Patch  
 Путь: /api/users/{id}  
 Пример запроса:  
