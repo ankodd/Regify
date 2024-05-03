@@ -20,7 +20,7 @@ pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl 
 pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationRequest>) -> impl Responder {
     match pool.registration(&req.username, &req.password).await {
         RegistrationResult::Ok(user) => HttpResponse::Ok().json(user),
-        RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(cause),
+        RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"Error": cause})),
         RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"Error": "Username already in use"})),
         RegistrationResult::Other => HttpResponse::InternalServerError().json(json!({"Error": "Server error"}))
     }
@@ -51,7 +51,7 @@ pub async fn change_user(
     match pool.change_field(uuid.to_owned(), &req.field, &req.new_value).await {
         ChangeResult::Ok(user) => HttpResponse::Ok().json(user),
         ChangeResult::NotFoundField => HttpResponse::BadRequest().json(json!({"Error": "Not found field"})),
-        ChangeResult::WeakPassword(cause) => HttpResponse::BadRequest().json(cause),
+        ChangeResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"Error": cause})),
         ChangeResult::InvalidPrivilege => HttpResponse::BadRequest().json(json!({"Error": "Invalid privilege"})),
         ChangeResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"Error": "Username already in use"}))
     }
@@ -61,6 +61,6 @@ pub async fn change_user(
 pub async fn delete_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
     match pool.delete(uuid.to_owned()).await {
         DeleteResult::Ok(user) => HttpResponse::Ok().json(user),
-        DeleteResult::NotFound => HttpResponse::NotFound().json(json!({"Error": "Username already in use"}))
+        DeleteResult::NotFound => HttpResponse::NotFound().json(json!({"Error": "Not found"}))
     }
 }
