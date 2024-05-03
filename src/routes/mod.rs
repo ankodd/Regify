@@ -53,7 +53,7 @@ pub async fn change_user(
         ChangeResult::NotFoundField => HttpResponse::BadRequest().json(json!({"message": "not found field"})),
         ChangeResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"message": cause})),
         ChangeResult::InvalidPrivilege => HttpResponse::BadRequest().json(json!({"message": "invalid privilege"})),
-        ChangeResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"message": "Username already in use"}))
+        ChangeResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"message": "username already in use"}))
     }
 }
 
