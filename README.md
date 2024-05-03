@@ -35,6 +35,8 @@ uuid = { version = "1.8.0", features = ["v4", "serde"] }
 r2d2 = "0.8.10"
 env_logger = "0.11.3"
 diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
+actix-cors = "0.7.0"
+serde_json = "1.0.116"
 ```
 
 - **actix-web** - для запуска http сервера и создания маршрутов  
@@ -45,7 +47,9 @@ diesel-derive-enum = { version = "2.1.0", features = ["postgres"] }
 - **uuid** - Генератор уникального id  
 - **r2d2** - для работы с пулом подключений к бд  
 - **env_logger** - для логов в консоли  
-- **diesel_derive_enum** - расширение для дизеля, позволяет подставлять enum как тип данных SQL  
+- **diesel_derive_enum** - расширение для дизеля, позволяет подставлять enum как тип данных SQL
+- **actix-cors** - работа с cors
+- **serde_json** - создание json сообщения
 
 ## API
 ### Регистрация
