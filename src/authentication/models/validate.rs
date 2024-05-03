@@ -27,7 +27,7 @@ pub async fn is_validate_password(passwd: &str) -> PasswordResult {
     }
 
     if !passwd.chars().any(|c| c.is_ascii_lowercase()) {
-        return PasswordResult::NoUppercaseLetters;
+        return PasswordResult::NoLowercaseLetters;
     }
 
     if !passwd.chars().any(|c| c.is_ascii_digit()) {

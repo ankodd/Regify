@@ -11,8 +11,8 @@ use serde_json::json;
 pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl Responder {
     match pool.login(&req.username, &req.password).await {
         AuthorizationResult::Ok(user) => HttpResponse::Ok().json(user),
-        AuthorizationResult::NotFound => HttpResponse::NotFound().json(json!({"Error": "Not found"})),
-        AuthorizationResult::Other => HttpResponse::InternalServerError().json(json!({"Error": "Server error"}))
+        AuthorizationResult::NotFound => HttpResponse::NotFound().json(json!({"message": "not found"})),
+        AuthorizationResult::Other => HttpResponse::InternalServerError().json(json!({"message": "server error"}))
     }
 }
 
@@ -20,9 +20,9 @@ pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl 
 pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationRequest>) -> impl Responder {
     match pool.registration(&req.username, &req.password).await {
         RegistrationResult::Ok(user) => HttpResponse::Ok().json(user),
-        RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"Error": cause})),
-        RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"Error": "Username already in use"})),
-        RegistrationResult::Other => HttpResponse::InternalServerError().json(json!({"Error": "Server error"}))
+        RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"message": cause})),
+        RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"message": "username already in use"})),
+        RegistrationResult::Other => HttpResponse::InternalServerError().json(json!({"message": "server error"}))
     }
 }
 
@@ -30,7 +30,7 @@ pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationReque
 pub async fn fetch_users(pool: web::Data<Pool>) -> impl Responder {
     match pool.get_users().await {
         Some(user_list) => HttpResponse::Ok().json(user_list),
-        None => HttpResponse::NotFound().json(json!({"Error": "Not found"})),
+        None => HttpResponse::NotFound().json(json!({"message": "not found"})),
     }
 }
 
@@ -38,7 +38,7 @@ pub async fn fetch_users(pool: web::Data<Pool>) -> impl Responder {
 pub async fn fetch_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
     match pool.get(uuid.to_owned()).await {
         Some(user) => HttpResponse::Ok().json(user),
-        None => HttpResponse::NotFound().json(json!({"Error": "Not found"})),
+        None => HttpResponse::NotFound().json(json!({"message": "not found"})),
     }
 }
 
@@ -50,10 +50,10 @@ pub async fn change_user(
     ) -> impl Responder {
     match pool.change_field(uuid.to_owned(), &req.field, &req.new_value).await {
         ChangeResult::Ok(user) => HttpResponse::Ok().json(user),
-        ChangeResult::NotFoundField => HttpResponse::BadRequest().json(json!({"Error": "Not found field"})),
-        ChangeResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"Error": cause})),
-        ChangeResult::InvalidPrivilege => HttpResponse::BadRequest().json(json!({"Error": "Invalid privilege"})),
-        ChangeResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"Error": "Username already in use"}))
+        ChangeResult::NotFoundField => HttpResponse::BadRequest().json(json!({"message": "not found field"})),
+        ChangeResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"message": cause})),
+        ChangeResult::InvalidPrivilege => HttpResponse::BadRequest().json(json!({"message": "invalid privilege"})),
+        ChangeResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"message": "Username already in use"}))
     }
 }
 
@@ -61,6 +61,6 @@ pub async fn change_user(
 pub async fn delete_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
     match pool.delete(uuid.to_owned()).await {
         DeleteResult::Ok(user) => HttpResponse::Ok().json(user),
-        DeleteResult::NotFound => HttpResponse::NotFound().json(json!({"Error": "Not found"}))
+        DeleteResult::NotFound => HttpResponse::NotFound().json(json!({"message": "not found"}))
     }
 }
