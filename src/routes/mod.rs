@@ -1,28 +1,30 @@
 mod requests;
+mod error_message;
 
+use error_message::JsonError;
 use requests::*;
 use crate::authentication::Pool;
-use crate::authentication::models::errors::*;
 use actix_web::{delete, get, patch, post, web, HttpResponse, Responder};
 use uuid::Uuid;
-use serde_json::json;
 
 #[post("/login")]
 pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl Responder {
+    use crate::authentication::models::errors::AuthorizationResult::*;
     match pool.login(&req.username, &req.password).await {
-        AuthorizationResult::Ok(user) => HttpResponse::Ok().json(user),
-        AuthorizationResult::NotFound => HttpResponse::NotFound().json(json!({"message": "not found"})),
-        AuthorizationResult::Other => HttpResponse::InternalServerError().json(json!({"message": "server error"}))
+        Ok(user) => HttpResponse::Ok().json(user),
+        NotFound => HttpResponse::NotFound().json(JsonError::new("not found")),
+        Other => HttpResponse::InternalServerError().json(JsonError::new("server error"))
     }
 }
 
 #[post("/registration")]
 pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationRequest>) -> impl Responder {
+    use crate::authentication::models::errors::RegistrationResult::*;
     match pool.registration(&req.username, &req.password).await {
-        RegistrationResult::Ok(user) => HttpResponse::Ok().json(user),
-        RegistrationResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"message": cause})),
-        RegistrationResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"message": "username already in use"})),
-        RegistrationResult::Other => HttpResponse::InternalServerError().json(json!({"message": "server error"}))
+        Ok(user) => HttpResponse::Ok().json(user),
+        WeakPassword(cause) => HttpResponse::BadRequest().json(JsonError::new(&cause)),
+        AlreadyInUse => HttpResponse::BadRequest().json(JsonError::new("username already in use")),
+        Other => HttpResponse::InternalServerError().json(JsonError::new("server error"))
     }
 }
 
@@ -30,7 +32,7 @@ pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationReque
 pub async fn fetch_users(pool: web::Data<Pool>) -> impl Responder {
     match pool.get_users().await {
         Some(user_list) => HttpResponse::Ok().json(user_list),
-        None => HttpResponse::NotFound().json(json!({"message": "not found"})),
+        None => HttpResponse::NotFound().json(JsonError::new("not found")),
     }
 }
 
@@ -38,7 +40,7 @@ pub async fn fetch_users(pool: web::Data<Pool>) -> impl Responder {
 pub async fn fetch_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
     match pool.get(uuid.to_owned()).await {
         Some(user) => HttpResponse::Ok().json(user),
-        None => HttpResponse::NotFound().json(json!({"message": "not found"})),
+        None => HttpResponse::NotFound().json(JsonError::new("not found")),
     }
 }
 
@@ -48,19 +50,21 @@ pub async fn change_user(
     uuid: web::Path<Uuid>,
     req: web::Json<ChangeRequest>
     ) -> impl Responder {
+    use crate::authentication::models::errors::ChangeResult::*;
     match pool.change_field(uuid.to_owned(), &req.field, &req.new_value).await {
-        ChangeResult::Ok(user) => HttpResponse::Ok().json(user),
-        ChangeResult::NotFoundField => HttpResponse::BadRequest().json(json!({"message": "not found field"})),
-        ChangeResult::WeakPassword(cause) => HttpResponse::BadRequest().json(json!({"message": cause})),
-        ChangeResult::InvalidPrivilege => HttpResponse::BadRequest().json(json!({"message": "invalid privilege"})),
-        ChangeResult::AlreadyInUse => HttpResponse::BadRequest().json(json!({"message": "username already in use"}))
+        Ok(user) => HttpResponse::Ok().json(user),
+        NotFoundField => HttpResponse::BadRequest().json(JsonError::new("not found field")),
+        WeakPassword(cause) => HttpResponse::BadRequest().json(JsonError::new(&cause)),
+        InvalidPrivilege => HttpResponse::BadRequest().json(JsonError::new("invalid privilege")),
+        AlreadyInUse => HttpResponse::BadRequest().json(JsonError::new("username already in use"))
     }
 }
 
 #[delete("/users/{id}")]
 pub async fn delete_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
+    use crate::authentication::models::errors::DeleteResult::*;
     match pool.delete(uuid.to_owned()).await {
-        DeleteResult::Ok(user) => HttpResponse::Ok().json(user),
-        DeleteResult::NotFound => HttpResponse::NotFound().json(json!({"message": "not found"}))
+        Ok(user) => HttpResponse::Ok().json(user),
+        NotFound => HttpResponse::NotFound().json(JsonError::new("not found"))
     }
 }
