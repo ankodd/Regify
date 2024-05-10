@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use crate::authentication::DbPool;
 use crate::authentication::models::User;
 use crate::schema::users::dsl::*;
-use crate::authentication::models::errors::PasswordResult;
+use crate::authentication::errors_handling::errors::PasswordResult;
 
 pub async fn is_validate_username(pool: &DbPool, login: &str) -> bool {
     if users

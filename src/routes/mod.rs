@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 #[post("/login")]
 pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl Responder {
-    use crate::authentication::models::errors::AuthorizationResult::*;
+    use crate::authentication::errors_handling::errors::AuthorizationResult::*;
     match pool.login(&req.username, &req.password).await {
         Ok(user) => HttpResponse::Ok().json(user),
         NotFound => HttpResponse::NotFound().json(JsonError::new("not found")),
@@ -19,7 +19,7 @@ pub async fn login(pool: web::Data<Pool>, req: web::Json<LoginRequest>) -> impl 
 
 #[post("/registration")]
 pub async fn registration(pool: web::Data<Pool>,req: web::Json<RegistrationRequest>) -> impl Responder {
-    use crate::authentication::models::errors::RegistrationResult::*;
+    use crate::authentication::errors_handling::errors::RegistrationResult::*;
     match pool.registration(&req.username, &req.password).await {
         Ok(user) => HttpResponse::Ok().json(user),
         WeakPassword(cause) => HttpResponse::BadRequest().json(JsonError::new(&cause)),
@@ -50,7 +50,7 @@ pub async fn change_user(
     uuid: web::Path<Uuid>,
     req: web::Json<ChangeRequest>
     ) -> impl Responder {
-    use crate::authentication::models::errors::ChangeResult::*;
+    use crate::authentication::errors_handling::errors::ChangeResult::*;
     match pool.change_field(uuid.to_owned(), &req.field, &req.new_value).await {
         Ok(user) => HttpResponse::Ok().json(user),
         NotFoundField => HttpResponse::BadRequest().json(JsonError::new("not found field")),
@@ -62,7 +62,7 @@ pub async fn change_user(
 
 #[delete("/users/{id}")]
 pub async fn delete_user(pool: web::Data<Pool>, uuid: web::Path<Uuid>) -> impl Responder {
-    use crate::authentication::models::errors::DeleteResult::*;
+    use crate::authentication::errors_handling::errors::DeleteResult::*;
     match pool.delete(uuid.to_owned()).await {
         Ok(user) => HttpResponse::Ok().json(user),
         NotFound => HttpResponse::NotFound().json(JsonError::new("not found"))

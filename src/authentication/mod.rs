@@ -1,5 +1,8 @@
 pub mod models;
-use crate::authentication::models::{User, NewUser, errors::*, privilege::*, constants, validate::*};
+pub mod errors_handling;
+
+use crate::authentication::models::{User, NewUser, privilege::*, constants};
+use errors_handling::{errors::*, validate::*};
 use crate::schema::users::dsl::*;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
@@ -8,7 +11,6 @@ use dotenvy::dotenv;
 use uuid::Uuid;
 use std::env;
 use std::str::FromStr;
-use crate::authentication::models::errors::ChangeResult::WeakPassword;
 
 pub type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -103,10 +105,10 @@ impl Pool {
                             .get_result::<User>(&mut self.0.get().unwrap()).unwrap();
                         ChangeResult::Ok(user)
                     }
-                    PasswordResult::TooShort => WeakPassword(PasswordResult::TooShort.to_string()),
-                    PasswordResult::NoUppercaseLetters => WeakPassword(PasswordResult::NoUppercaseLetters.to_string()),
-                    PasswordResult::NoLowercaseLetters => WeakPassword(PasswordResult::NoLowercaseLetters.to_string()),
-                    PasswordResult::NoDigits => WeakPassword(PasswordResult::NoDigits.to_string()),
+                    PasswordResult::TooShort => ChangeResult::WeakPassword(PasswordResult::TooShort.to_string()),
+                    PasswordResult::NoUppercaseLetters => ChangeResult::WeakPassword(PasswordResult::NoUppercaseLetters.to_string()),
+                    PasswordResult::NoLowercaseLetters => ChangeResult::WeakPassword(PasswordResult::NoLowercaseLetters.to_string()),
+                    PasswordResult::NoDigits => ChangeResult::WeakPassword(PasswordResult::NoDigits.to_string()),
                 }
             },
             constants::PRIVILEGE => {
